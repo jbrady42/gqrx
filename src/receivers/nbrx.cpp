@@ -46,6 +46,8 @@ nbrx::nbrx(float quad_rate, float audio_rate)
     agc = make_rx_agc_cc(PREF_QUAD_RATE, true, -100, 0, 0, 500, false);
     sql = gr::analog::simple_squelch_cc::make(-150.0, 0.001);
     meter = make_rx_meter_c(DETECTOR_TYPE_RMS);
+    auto taps = gr::filter::firdes::band_pass(10, audio_rate, 180, 1100, 25);
+    audio_filter = gr::filter::fir_filter_fff::make(1, taps);
     demod_raw = gr::blocks::complex_to_float::make(1);
     demod_ssb = gr::blocks::complex_to_real::make(1);
     demod_fm = make_rx_demod_fm(PREF_QUAD_RATE, 5000.0, 75.0e-6);
@@ -276,7 +278,14 @@ void nbrx::set_demod(int rx_demod)
         }
         else
         {
-            connect(demod, 0, audio_rr0, 0);
+            // Filter audio If NBFM
+            if(rx_demod == NBRX_DEMOD_FM) {
+              connect(demod, 0, audio_filter, 0);
+              connect(audio_filter, 0, audio_rr0, 0);
+            } else {
+
+              connect(demod, 0, audio_rr0, 0);
+            }
 
             connect(audio_rr0, 0, self(), 0);
             connect(audio_rr0, 0, self(), 1);

@@ -27,6 +27,8 @@
 #include <gnuradio/basic_block.h>
 #include <gnuradio/blocks/complex_to_float.h>
 #include <gnuradio/blocks/complex_to_real.h>
+#include <gnuradio/filter/fir_filter_fff.h>
+#include <gnuradio/filter/firdes.h>
 #include "receivers/receiver_base.h"
 #include "dsp/rx_noise_blanker_cc.h"
 #include "dsp/rx_filter.h"
@@ -128,6 +130,8 @@ private:
     resampler_ff_sptr         audio_rr1;  /*!< Audio resampler. */
 
     gr::basic_block_sptr      demod;    // dummy pointer used for simplifying reconf
+
+    gr::filter::fir_filter_fff::sptr audio_filter; // Audio filter
 };
 
 #endif // NBRX_H
